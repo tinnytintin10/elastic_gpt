@@ -2,6 +2,10 @@
 
 This is a Node.js script that uses OpenAI's GPT-3 language model to generate an Elasticsearch query based on a user's input question. The script prompts the user to provide the file path for an Elasticsearch Common Schema (ECS) YAML file, then prompts the user for a query. It uses the GPT-3 model to generate a corresponding Elasticsearch query and runs it against an Elasticsearch cluster, returning the number of hits.
 
+
+https://user-images.githubusercontent.com/53792284/229661059-f7f0b313-cc78-4def-8f3d-7537d9cfc2c8.mov
+
+
 ### Prerequisites
 
 To use this script, you will need:
