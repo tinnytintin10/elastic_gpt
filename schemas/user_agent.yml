@@ -1,0 +1,58 @@
+# Licensed to Elasticsearch B.V. under one or more contributor
+# license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright
+# ownership. Elasticsearch B.V. licenses this file to you under
+# the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+- name: user_agent
+  title: User agent
+  group: 2
+  short: Fields to describe a browser user_agent string.
+  description: >
+    The user_agent fields normally come from a browser request.
+
+    They often show up in web service logs coming from the parsed user agent string.
+  type: group
+  fields:
+
+    - name: original
+      level: extended
+      type: keyword
+      multi_fields:
+        - type: match_only_text
+          name: text
+      description: >
+        Unparsed user_agent string.
+      example: "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
+
+    - name: name
+      level: extended
+      type: keyword
+      example: Safari
+      description: >
+        Name of the user agent.
+
+    - name: version
+      level: extended
+      type: keyword
+      description: >
+        Version of the user agent.
+      example: 12.0
+
+    - name: device.name
+      level: extended
+      type: keyword
+      example: iPhone
+      description: >
+        Name of the device.

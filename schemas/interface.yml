@@ -1,0 +1,61 @@
+# Licensed to Elasticsearch B.V. under one or more contributor
+# license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright
+# ownership. Elasticsearch B.V. licenses this file to you under
+# the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+- name: interface
+  title: Interface
+  group: 2
+  short: Fields to describe observer interface information.
+  description: >
+    The interface fields are used to record ingress and egress interface information when
+    reported by an observer (e.g. firewall, router, load balancer) in the context of the
+    observer handling a network connection.  In the case of a single observer interface
+    (e.g. network sensor on a span port) only the observer.ingress information should be
+    populated.
+
+  reusable:
+    top_level: false
+    expected:
+      - observer.ingress
+      - observer.egress
+
+  type: group
+  fields:
+
+    - name: id
+      level: extended
+      type: keyword
+      short: Interface ID
+      example: 10
+      description: >
+        Interface ID as reported by an observer (typically SNMP interface ID).
+
+    - name: name
+      level: extended
+      type: keyword
+      short: Interface name
+      example: eth0
+      description: >
+        Interface name as reported by the system.
+
+    - name: alias
+      level: extended
+      type: keyword
+      short: Interface alias
+      example: outside
+      description: >
+        Interface alias as reported by the system, typically used in firewall implementations for e.g.
+        inside, outside, or dmz logical interface naming.

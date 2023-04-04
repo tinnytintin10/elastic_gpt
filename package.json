@@ -1,0 +1,17 @@
+{
+  "name": "elastic_gpt",
+  "version": "1.0.0",
+  "description": "Experimental script that brings OpenAI API to Elastic to run queries in human language.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tinsae",
+  "license": "ISC",
+  "dependencies": {
+    "inquirer": "^9.1.5",
+    "inquirer-file-tree-selection-prompt": "^2.0.5",
+    "openai": "^3.2.1",
+    "prompt-sync": "^4.2.0"
+  }
+}

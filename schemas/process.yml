@@ -1,0 +1,421 @@
+# Licensed to Elasticsearch B.V. under one or more contributor
+# license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright
+# ownership. Elasticsearch B.V. licenses this file to you under
+# the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+- name: process
+  title: Process
+  group: 2
+  short: These fields contain information about a process.
+  description: >
+    These fields contain information about a process.
+
+    These fields can help you correlate metrics information with a process id/name
+    from a log message.  The `process.pid` often stays in the metric itself and is
+    copied to the global field for correlation.
+  type: group
+  reusable:
+    top_level: true
+    expected:
+      - at: process
+        as: parent
+        short_override: Information about the parent process.
+      - at: process
+        as: entry_leader
+        short_override: First process from terminal or remote access via SSH, SSM, etc OR a service directly started by the init process.
+      - at: process
+        as: session_leader
+        short_override: Often the same as entry_leader. When it differs, it represents a session started within another session. e.g. using tmux
+      - at: process
+        as: group_leader
+        short_override: Information about the process group leader. In some cases this may be the same as the top level process.
+      - at: process.parent
+        as: group_leader
+        short_override: Information about the parent's process group leader. Only pid, start and entity_id fields are set.
+      - at: process.entry_leader
+        as: parent
+        short_override: Information about the entry leader's parent process. Only pid, start and entity_id fields are set.
+      - at: process.session_leader
+        as: parent
+        short_override: Information about the session leader's parent process. Only pid, start and entity_id fields are set.
+      - at: process.entry_leader.parent
+        as: session_leader
+        short_override: Information about the parent session of the entry leader. Only pid, start and entity_id fields are set.
+      - at: process.session_leader.parent
+        as: session_leader
+        short_override: Information about the parent session of the session leader. Only pid, start and entity_id fields are set.
+      - at: process
+        as: previous
+        short_override: An array of previous executions for the process, including the initial fork. Only executable and args are set.
+        normalize:
+          - array
+
+  fields:
+
+    - name: pid
+      format: string
+      level: core
+      type: long
+      description: >
+        Process id.
+      example: 4242
+
+    - name: entity_id
+      level: extended
+      type: keyword
+      short: Unique identifier for the process.
+      description: >
+        Unique identifier for the process.
+
+        The implementation of this is specified by the data source, but some
+        examples of what could be used here are a process-generated UUID,
+        Sysmon Process GUIDs, or a hash of some uniquely identifying components
+        of a process.
+
+        Constructing a globally unique identifier is a common practice to mitigate
+        PID reuse as well as to identify a specific process over time, across multiple
+        monitored hosts.
+      example: c2c455d9f99375d
+
+    - name: name
+      level: extended
+      type: keyword
+      short: Process name.
+      description: >
+        Process name.
+
+        Sometimes called program name or similar.
+      example: ssh
+      multi_fields:
+        - type: match_only_text
+          name: text
+
+    - name: pgid
+      format: string
+      level: extended
+      type: long
+      short: Deprecated identifier of the group of processes the process belongs to.
+      description: >
+        Deprecated for removal in next major version release. This field is superseded by
+        `process.group_leader.pid`.
+
+        Identifier of the group of processes the process belongs to.
+
+    - name: command_line
+      level: extended
+      type: wildcard
+      short: Full command line that started the process.
+      description: >
+        Full command line that started the process, including the absolute path
+        to the executable, and all arguments.
+
+        Some arguments may be filtered to protect sensitive information.
+      example: "/usr/bin/ssh -l user 10.0.0.16"
+      multi_fields:
+        - type: match_only_text
+          name: text
+
+    - name: args
+      level: extended
+      type: keyword
+      short: Array of process arguments.
+      description: >
+        Array of process arguments, starting with the absolute path to the executable.
+
+        May be filtered to protect sensitive information.
+      example: "[\"/usr/bin/ssh\", \"-l\", \"user\", \"10.0.0.16\"]"
+      normalize:
+        - array
+
+    - name: args_count
+      level: extended
+      type: long
+      short: Length of the process.args array.
+      description: >
+        Length of the process.args array.
+
+        This field can be useful for querying or performing bucket analysis on
+        how many arguments were provided to start a process.
+        More arguments may be an indication of suspicious activity.
+      example: 4
+
+    - name: executable
+      level: extended
+      type: keyword
+      description: >
+        Absolute path to the process executable.
+      example: /usr/bin/ssh
+      multi_fields:
+        - type: match_only_text
+          name: text
+
+    - name: title
+      level: extended
+      type: keyword
+      short: Process title.
+      description: >
+        Process title.
+
+        The proctitle, some times the same as process name. Can also be different:
+        for example a browser setting its title to the web page currently opened.
+      multi_fields:
+        - type: match_only_text
+          name: text
+
+    - name: thread.id
+      format: string
+      level: extended
+      type: long
+      example: 4242
+      description: >
+        Thread ID.
+
+    - name: thread.name
+      level: extended
+      type: keyword
+      example: 'thread-0'
+      description: >
+        Thread name.
+
+    - name: start
+      level: extended
+      type: date
+      example: "2016-05-23T08:05:34.853Z"
+      description: >
+        The time the process started.
+
+    - name: uptime
+      level: extended
+      type: long
+      example: 1325
+      description: >
+        Seconds the process has been up.
+
+    - name: working_directory
+      level: extended
+      type: keyword
+      example: /home/alice
+      description: >
+        The working directory of the process.
+      multi_fields:
+        - type: match_only_text
+          name: text
+
+    - name: exit_code
+      level: extended
+      type: long
+      example: 137
+      short: The exit code of the process.
+      description: >
+        The exit code of the process, if this is a termination event.
+
+        The field should be absent if there is no exit code for the event (e.g.
+        process start).
+
+    - name: end
+      level: extended
+      type: date
+      example: "2016-05-23T08:05:34.853Z"
+      description: >
+        The time the process ended.
+
+    - name: interactive
+      level: extended
+      type: boolean
+      example: true
+      short: Whether the process is connected to an interactive shell.
+      description: >
+        Whether the process is connected to an interactive shell.
+
+        Process interactivity is inferred from the processes file descriptors. If the character device for the controlling tty is the same as stdin and stderr for the process, the process is considered interactive.
+
+        Note: A non-interactive process can belong to an interactive session and is simply one that does not have open file descriptors reading the controlling TTY on FD 0 (stdin) or writing to the controlling TTY on FD 2 (stderr). A backgrounded process is still considered interactive if stdin and stderr are connected to the controlling TTY.
+
+    - name: same_as_process
+      level: extended
+      type: boolean
+      example: true
+      short: This boolean is used to identify if a leader process is the same as the top level process.
+      description: >
+        This boolean is used to identify if a leader process is the same as the top level process.
+
+        For example, if `process.group_leader.same_as_process = true`, it means the process event in question is the leader of its process group. Details under `process.*` like `pid` would be the same under `process.group_leader.*`
+        The same applies for both `process.session_leader` and `process.entry_leader`.
+
+        This field exists to the benefit of EQL and other rule engines since it's not possible to compare equality between two fields in a single document.
+        e.g
+        `process.entity_id` = `process.group_leader.entity_id` (top level process is the process group leader)
+        OR
+        `process.entity_id` = `process.entry_leader.entity_id` (top level process is the entry session leader)
+
+        Instead these rules could be written like:
+        `process.group_leader.same_as_process: true`
+        OR
+        `process.entry_leader.same_as_process: true`
+
+        Note: This field is only set on `process.entry_leader`, `process.session_leader` and `process.group_leader`.
+
+    - name: env_vars
+      level: extended
+      type: keyword
+      beta: This field is beta and subject to change.
+      short: Array of environment variable bindings.
+      description: >
+        Array of environment variable bindings.
+        Captured from a snapshot of the environment at the time of execution.
+
+        May be filtered to protect sensitive information.
+      example: "[\"PATH=/usr/local/bin:/usr/bin\", \"USER=ubuntu\"]"
+      normalize:
+        - array
+
+    - name: entry_meta.type
+      level: extended
+      type: keyword
+      short: The entry type for the entry session leader.
+      description: >
+        The entry type for the entry session leader.
+        Values include: init(e.g systemd), sshd, ssm, kubelet, teleport, terminal, console
+
+        Note: This field is only set on process.session_leader.
+
+    - name: entry_meta.source
+      level: extended
+      type: source
+      short: Entry point information for a session.
+      description: >
+        Entry point information for a session.
+        Remote client information such as ip, port and geo location.
+
+    - name: tty
+      level: extended
+      type: object
+      short: Information about the controlling TTY device.
+      description: >
+        Information about the controlling TTY device. If set, the process belongs to an interactive session.
+
+    - name: tty.char_device.major
+      level: extended
+      type: long
+      short: The TTY character device's major number.
+      description: >
+        The major number identifies the driver associated with the device. The character device's major and minor numbers can be algorithmically combined to produce the more familiar terminal identifiers such as "ttyS0" and "pts/0". For more details, please refer to the Linux kernel documentation.
+      example: 4
+
+    - name: tty.char_device.minor
+      level: extended
+      type: long
+      short: The TTY character device's minor number.
+      description: >
+        The minor number is used only by the driver specified by the major number; other parts of the kernel don’t use it, and merely pass it along to the driver. It is common for a driver to control several devices; the minor number provides a way for the driver to differentiate among them.
+      example: 1
+
+    - name: tty.rows
+      level: extended
+      type: long
+      beta: This field is beta and subject to change.
+      short: The number of character rows in the terminal. e.g terminal height
+      description: >
+        The number of character rows in the terminal. e.g terminal height
+
+        Terminal sizes can change, so this value reflects the maximum value for a given IO event. i.e. where event.action = 'text_output'
+      example: 24
+
+    - name: tty.columns
+      level: extended
+      type: long
+      beta: This field is beta and subject to change.
+      short: The number of character columns per line. e.g terminal width
+      description: >
+        The number of character columns per line. e.g terminal width
+
+        Terminal sizes can change, so this value reflects the maximum value for a given IO event. i.e. where event.action = 'text_output'
+      example: 80
+
+    - name: io
+      level: extended
+      type: object
+      beta: This field is beta and subject to change.
+      short: A chunk of input or output (IO) from a single process.
+      description: >
+        A chunk of input or output (IO) from a single process.
+
+        This field only appears on the top level process object, which is the process that wrote the output or read the input.
+
+    - name: io.type
+      level: extended
+      type: keyword
+      beta: This field is beta and subject to change.
+      short: The type of object on which the IO action (read or write) was taken.
+      description: >
+        The type of object on which the IO action (read or write) was taken.
+
+        Currently only 'tty' is supported. Other types may be added in the future for 'file' and 'socket' support.
+
+    - name: io.text
+      level: extended
+      type: wildcard
+      beta: This field is beta and subject to change.
+      short: A chunk of output or input sanitized to UTF-8.
+      description: >
+        A chunk of output or input sanitized to UTF-8.
+
+        Best efforts are made to ensure complete lines are captured in these events. Assumptions should NOT be made that multiple lines will appear in the same event. TTY output may contain terminal control codes such as for cursor movement, so some string queries may not match due to terminal codes inserted between characters of a word.
+
+    - name: io.total_bytes_captured
+      level: extended
+      type: long
+      beta: This field is beta and subject to change.
+      description: >
+        The total number of bytes captured in this event.
+
+    - name: io.total_bytes_skipped
+      level: extended
+      type: long
+      beta: This field is beta and subject to change.
+      short: The total number of bytes that were not captured due to implementation restrictions such as buffer size limits.
+      description: >
+        The total number of bytes that were not captured due to implementation restrictions such as buffer size limits. Implementors should strive to ensure this value is always zero
+
+    - name: io.max_bytes_per_process_exceeded
+      level: extended
+      type: boolean
+      beta: This field is beta and subject to change.
+      description: >
+        If true, the process producing the output has exceeded the max_kilobytes_per_process configuration setting.
+
+    - name: io.bytes_skipped
+      level: extended
+      type: object
+      beta: This field is beta and subject to change.
+      description: >
+        An array of byte offsets and lengths denoting where IO data has been skipped.
+
+      normalize:
+        - array
+
+    - name: io.bytes_skipped.offset
+      level: extended
+      type: long
+      beta: This field is beta and subject to change.
+      description: >
+        The byte offset into this event's io.text (or io.bytes in the future) where length bytes were skipped.
+
+    - name: io.bytes_skipped.length
+      level: extended
+      type: long
+      beta: This field is beta and subject to change.
+      description: >
+        The length of bytes skipped.

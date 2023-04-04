@@ -1,0 +1,129 @@
+# Licensed to Elasticsearch B.V. under one or more contributor
+# license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright
+# ownership. Elasticsearch B.V. licenses this file to you under
+# the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+- name: container
+  title: Container
+  group: 2
+  short: Fields describing the container that generated this event.
+  description: >
+    Container fields are used for meta information about the specific container
+    that is the source of information.
+
+    These fields help correlate data based containers from any runtime.
+  type: group
+  fields:
+
+    - name: cpu.usage
+      type: scaled_float
+      scaling_factor: 1000
+      level: extended
+      short: Percent CPU used, between 0 and 1.
+      description: >
+        Percent CPU used which is normalized by the number of CPU cores and it
+        ranges from 0 to 1. Scaling factor: 1000.
+
+    - name: disk.read.bytes
+      type: long
+      level: extended
+      short: The number of bytes read by all disks.
+      description: >
+        The total number of bytes (gauge) read successfully (aggregated from all
+        disks) since the last metric collection.
+
+    - name: disk.write.bytes
+      type: long
+      level: extended
+      short: The number of bytes written on all disks.
+      description: >
+        The total number of bytes (gauge) written successfully (aggregated from
+        all disks) since the last metric collection.
+
+    - name: id
+      level: core
+      type: keyword
+      description: >
+        Unique container id.
+
+    - name: image.name
+      level: extended
+      type: keyword
+      description: >
+        Name of the image the container was built on.
+
+    - name: image.tag
+      level: extended
+      type: keyword
+      description: >
+        Container image tags.
+      normalize:
+        - array
+
+    - name: image.hash.all
+      level: extended
+      type: keyword
+      short: An array of digests of the image the container was built on.
+      description: >
+        An array of digests of the image the container was built on.
+        Each digest consists of the hash algorithm and value in this format: `algorithm:value`.
+        Algorithm names should align with the field names in the ECS hash field set.
+      example: '[sha256:f8fefc80e3273dc756f288a63945820d6476ad64883892c771b5e2ece6bf1b26]'
+      normalize:
+        - array
+
+    - name: labels
+      level: extended
+      type: object
+      object_type: keyword
+      description: >
+        Image labels.
+
+    - name: memory.usage
+      type: scaled_float
+      scaling_factor: 1000
+      level: extended
+      short: Percent memory used, between 0 and 1.
+      description: >
+        Memory usage percentage and it ranges from 0 to 1. Scaling factor: 1000.
+
+    - name: name
+      level: extended
+      type: keyword
+      description: >
+        Container name.
+
+    - name: network.ingress.bytes
+      type: long
+      level: extended
+      short: The number of bytes received on all network interfaces.
+      description: >
+        The number of bytes received (gauge) on all network interfaces by the
+        container since the last metric collection.
+
+    - name: network.egress.bytes
+      type: long
+      level: extended
+      short: The number of bytes sent on all network interfaces.
+      description: >
+        The number of bytes (gauge) sent out on all network interfaces by the
+        container since the last metric collection.
+
+    - name: runtime
+      level: extended
+      type: keyword
+      description: >
+        Runtime managing this container.
+      example: docker

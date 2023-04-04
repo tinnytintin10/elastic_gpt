@@ -1,0 +1,95 @@
+# Licensed to Elasticsearch B.V. under one or more contributor
+# license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright
+# ownership. Elasticsearch B.V. licenses this file to you under
+# the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# 	http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+---
+- name: agent
+  title: Agent
+  group: 2
+  short: Fields about the monitoring agent.
+  description: >
+    The agent fields contain the data about the software entity, if any, that collects, detects, or observes events on a host, or takes measurements on a host.
+
+    Examples include Beats. Agents may also run on observers. ECS agent.* fields shall be populated with details of the agent running on the host or observer where the event happened or the measurement was taken.
+  footnote: >
+    Examples: In the case of Beats for logs, the agent.name is filebeat. For APM, it is the
+    agent running in the app/service. The agent information does not change if
+    data is sent through queuing systems like Kafka, Redis, or processing systems
+    such as Logstash or APM Server.
+  type: group
+  fields:
+    - name: version
+      level: core
+      type: keyword
+      description: >
+        Version of the agent.
+
+      example: 6.0.0-rc2
+
+    - name: build.original
+      level: core
+      type: keyword
+      short: Extended build information for the agent.
+      description: >
+        Extended build information for the agent.
+
+        This field is intended to contain any build information that a data source
+        may provide, no specific formatting is required.
+      example: metricbeat version 7.6.0 (amd64), libbeat 7.6.0 [6a23e8f8f30f5001ba344e4e54d8d9cb82cb107c built 2020-02-05 23:10:10 +0000 UTC]
+
+    - name: name
+      level: core
+      type: keyword
+      short: Custom name of the agent.
+      description: >
+        Custom name of the agent.
+
+        This is a name that can be given to an agent. This can be helpful if
+        for example two Filebeat instances are running on the same host
+        but a human readable separation is needed on which Filebeat instance
+        data is coming from.
+      example: foo
+
+    - name: type
+      level: core
+      type: keyword
+      short: Type of the agent.
+      description: >
+        Type of the agent.
+
+        The agent type always stays the same and should be given by the agent used.
+        In case of Filebeat the agent would always be Filebeat also if two
+        Filebeat instances are run on the same machine.
+      example: filebeat
+
+    - name: id
+      level: core
+      type: keyword
+      short: Unique identifier of this agent.
+      description: >
+        Unique identifier of this agent (if one exists).
+
+        Example: For Beats this would be beat.id.
+      example: 8a4f500d
+
+    - name: ephemeral_id
+      level: extended
+      type: keyword
+      short: Ephemeral identifier of this agent.
+      description: >
+        Ephemeral identifier of this agent (if one exists).
+
+        This id normally changes across restarts, but `agent.id` does not.
+      example: 8a4f500f
